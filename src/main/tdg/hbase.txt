@@ -1,0 +1,53 @@
+Hadoop TDG3
+
+$ hbase
+$ export HBASE_CLASSPATH=/home/yhli/dev/hbase/ycdh-hbase-1.0.jar
+
+#)13.3 安装
+$ hbase shell
+hbase>
+create 'test', 'data'
+list
+put 'test', 'row1', 'data:1', 'value1'
+put 'test', 'row2', 'data:2', 'value2'
+put 'test', 'row3', 'data:3', 'value3'
+scan 'test'
+disable 'test'
+drop 'test'
+
+#)13.4 客户端
+:Java
+$ hbase com.hadoopbook.hbase.ExampleClient
+:MapReduce
+$ hadoop jar ycdh-hbase-*.jar com.hadoopbook.hbase.SimpleRowCounter test
+
+#)13.5 示例
+:模式
+$ hbase shell
+hbase>
+create 'stations', {NAME => 'info', VERSIONS => 1}
+create 'observations', {NAME => 'data', VERSIONS => 1}
+
+count 'stations', INTERVAL => 10000, CACHE => 1000
+scan 'stations', {LIMIT => 10}
+get 'stations', '010010-99999'
+truncate_preserve 'stations'
+disable 'stations'
+drop 'stations'
+
+count 'observations', INTERVAL => 1000, CACHE => 100
+scan 'observations', {LIMIT => 10}
+truncate_preserve 'observations'
+disable 'observations'
+drop 'observations'
+
+:加载数据
+$ hbase com.hadoopbook.hbase.HBaseStationImporter input/ncdc/metadata/stations-fixed-width.txt
+$ hbase com.hadoopbook.hbase.HBaseStationQuery 029070-99999
+
+$ hbase com.hadoopbook.hbase.HBaseTemperatureDirectImporter input/ncdc/all
+$ hdfs dfs -put input/ncdc/all input/ncdc
+$ hbase com.hadoopbook.hbase.HBaseTemperatureImporter input/ncdc/all
+$ hbase com.hadoopbook.hbase.HBaseTemperatureBulkImporter input/ncdc/all
+$ hbase com.hadoopbook.hbase.HBaseTemperatureQuery 029070-99999
+
